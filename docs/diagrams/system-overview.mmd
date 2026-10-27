@@ -1,0 +1,22 @@
+flowchart LR
+    subgraph Browser["Learner's browser"]
+        VIDEO["YouTube video"]
+        EXT["Extension study panel<br/>React + TypeScript"]
+        LOCAL[("IndexedDB<br/>Working notes and screenshots")]
+        WEB["Web dashboard<br/>React + Vite"]
+        VIDEO --> EXT
+        EXT <--> LOCAL
+    end
+
+    API["Django REST API<br/>Authentication and usage enforcement"]
+    DB[("CockroachDB<br/>Application data + vector retrieval")]
+    S3[("AWS S3<br/>PDF documents")]
+    LLM["Language model + embeddings<br/>Fireworks AI / Gemini"]
+    SERVICES["Google OAuth, email, Paddle"]
+
+    EXT -->|"HTTPS / streamed chat"| API
+    WEB -->|"HTTPS / JSON"| API
+    API --> DB
+    API --> S3
+    API --> LLM
+    API --> SERVICES

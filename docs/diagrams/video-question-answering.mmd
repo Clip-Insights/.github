@@ -1,0 +1,26 @@
+sequenceDiagram
+    actor Learner
+    participant Extension
+    participant API as Backend API
+    participant Embeddings
+    participant Store as Vector store
+    participant LLM as Language model
+
+    Learner->>Extension: Ask a question about the video
+    Extension->>API: Question, transcript, video URL, recent messages
+    API->>API: Check authentication and usage allowance
+    API->>Store: Check video and embedding-model cache key
+    alt Transcript vectors are absent
+        API->>API: Split transcript into chunks
+        API->>Embeddings: Embed transcript chunks
+        Embeddings-->>API: Document vectors
+        API->>Store: Store chunks and vectors
+    end
+    API->>Embeddings: Embed the question
+    Embeddings-->>API: Query vector
+    API->>Store: Retrieve the three nearest chunks
+    Store-->>API: Relevant transcript excerpts
+    API->>LLM: Excerpts, question, recent conversation
+    LLM-->>API: Stream answer tokens
+    API-->>Extension: Server-sent events
+    Extension-->>Learner: Render the answer as it arrives

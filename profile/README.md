@@ -37,24 +37,7 @@ Each repository includes its own setup instructions. Start with the [system arch
 
 ## How the system fits together
 
-```mermaid
-flowchart TB
-    SITE["Public website<br/>Product information and guides"]
-    EXT["Chrome extension<br/>Video study workspace"]
-    WEB["Web app<br/>Account and document library"]
-    API["Shared backend<br/>Django REST API"]
-    DB[("CockroachDB<br/>Accounts, metadata, transcript vectors")]
-    S3[("AWS S3<br/>Saved PDFs")]
-    AI["AI providers<br/>Language models, embeddings, transcription"]
-
-    SITE -. "Discover the tools" .-> EXT
-    SITE -. "Open account" .-> WEB
-    EXT --> API
-    WEB --> API
-    API --> DB
-    API --> S3
-    API --> AI
-```
+![Clip Insights system overview](./assets/system-overview.svg)
 
 The extension keeps working notes and screenshots in the browser. The backend generates AI insights and handles account services; saved PDFs live in object storage and appear in the web app. The public website provides information and guides independently of the authenticated tools.
 
@@ -62,7 +45,7 @@ The extension keeps working notes and screenshots in the browser. The backend ge
 
 Summaries and key points are generated from the video transcript. For chat, the backend divides the transcript into chunks, stores their embeddings, and retrieves the three most relevant chunks for each question. Those excerpts and recent conversation history provide context for a streamed answer.
 
-Language models, embeddings, and transcription services are configured through a provider registry. The current integrations include Fireworks AI, Google Gemini, and Groq Whisper. The [architecture guide](https://github.com/Clip-Insights/.github/blob/main/docs/ARCHITECTURE.md#video-question-answering) explains retrieval, caching, and fallback behavior.
+AI services are configured through a provider registry, with Fireworks AI and Google Gemini available for language-model generation. The [architecture guide](https://github.com/Clip-Insights/.github/blob/main/docs/ARCHITECTURE.md#video-question-answering) explains retrieval, caching, and fallback behavior.
 
 ## Read the implementation
 

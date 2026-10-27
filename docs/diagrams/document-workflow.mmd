@@ -1,0 +1,9 @@
+flowchart LR
+    CAPTURE["Capture frames<br/>Write timestamped notes"] --> LOCAL[("Browser IndexedDB")]
+    LOCAL --> PDF["Generate PDF<br/>Inside the extension"]
+    PDF --> DOWNLOAD["Download locally"]
+    PDF --> UPLOAD["Upload with account authentication"]
+    UPLOAD --> API["Backend<br/>Quota and file validation"]
+    API --> S3[("S3 document")]
+    API --> DB[("Database file metadata")]
+    DB --> DASH["Web dashboard<br/>Browse and organize files"]

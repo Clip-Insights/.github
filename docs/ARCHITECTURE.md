@@ -13,69 +13,17 @@ Clip Insights has four application repositories. The extension provides the vide
 
 ## System overview
 
-```mermaid
-flowchart LR
-    subgraph Browser["Learner's browser"]
-        VIDEO["YouTube video"]
-        EXT["Extension study panel<br/>React + TypeScript"]
-        LOCAL[("IndexedDB<br/>Working notes and screenshots")]
-        WEB["Web dashboard<br/>React + Vite"]
-        VIDEO --> EXT
-        EXT <--> LOCAL
-    end
-
-    API["Django REST API<br/>Authentication and usage enforcement"]
-    DB[("CockroachDB<br/>Application data + vector retrieval")]
-    S3[("AWS S3<br/>PDF documents")]
-    LLM["Language model + embeddings<br/>Fireworks AI / Gemini"]
-    STT["Audio transcription<br/>Groq Whisper"]
-    SERVICES["Google OAuth, email, Paddle"]
-
-    EXT -->|"HTTPS / streamed chat"| API
-    WEB -->|"HTTPS / JSON"| API
-    API --> DB
-    API --> S3
-    API --> LLM
-    API --> STT
-    API --> SERVICES
-```
+![System overview](./diagrams/system-overview.svg)
 
 The public Next.js website is separate from these account and AI requests. It links learners to the extension and web app.
 
 ## Video question answering
 
-```mermaid
-sequenceDiagram
-    actor Learner
-    participant Extension
-    participant API as Backend API
-    participant Embeddings
-    participant Store as Vector store
-    participant LLM as Language model
-
-    Learner->>Extension: Ask a question about the video
-    Extension->>API: Question, transcript, video URL, recent messages
-    API->>API: Check authentication and usage allowance
-    API->>Store: Check video and embedding-model cache key
-    alt Transcript vectors are absent
-        API->>API: Split transcript into chunks
-        API->>Embeddings: Embed transcript chunks
-        Embeddings-->>API: Document vectors
-        API->>Store: Store chunks and vectors
-    end
-    API->>Embeddings: Embed the question
-    Embeddings-->>API: Query vector
-    API->>Store: Retrieve the three nearest chunks
-    Store-->>API: Relevant transcript excerpts
-    API->>LLM: Excerpts, question, recent conversation
-    LLM-->>API: Stream answer tokens
-    API-->>Extension: Server-sent events
-    Extension-->>Learner: Render the answer as it arrives
-```
+![Video question answering](./diagrams/video-question-answering.svg)
 
 The cache key includes the video URL and embedding model identity. A model change therefore creates a separate set of vectors. The backend carries up to three recent conversation messages. If retrieval fails or returns no usable context, it uses a bounded transcript excerpt of up to 4,000 characters.
 
-Summaries use a separate service that requests structured summary and key-point output. Retrieval is the chat path; it is not required for every summary request. Transcription through Groq Whisper is exposed as a backend service for audio-based transcript generation.
+Summaries use a separate service that requests structured summary and key-point output. Retrieval is the chat path; it is not required for every summary request. The extension obtains captions through its platform adapter. Retired audio-transcription integrations are outside the supported API surface.
 
 Implementation: [`videos/services/chat.py`](https://github.com/Clip-Insights/backend/blob/main/videos/services/chat.py), [`videos/services/chunking.py`](https://github.com/Clip-Insights/backend/blob/main/videos/services/chunking.py), and [`integrations/registry.py`](https://github.com/Clip-Insights/backend/blob/main/integrations/registry.py).
 
@@ -109,4 +57,4 @@ Start with the repository READMEs for environment variables and exact commands. 
 
 For a focused code review, follow a request from the extension's API client into the backend URL configuration, view, service, and integration provider. For document management, follow the dashboard's authenticated request into the backend `files` app and storage provider.
 
-See the component guides for further detail: [extension](https://github.com/Clip-Insights/chrome-extension/blob/main/ARCHITECTURE.md), [backend](https://github.com/Clip-Insights/backend/blob/main/ARCHITECTURE.md), and [web app](https://github.com/Clip-Insights/web-app/blob/main/ARCHITECTURE.md).
+See the component guides for further detail: [extension](https://github.com/Clip-Insights/chrome-extension/blob/main/ARCHITECTURE.md), [backend](https://github.com/Clip-Insights/backend/blob/main/ARCHITECTURE.md), [web app](https://github.com/Clip-Insights/web-app/blob/main/ARCHITECTURE.md), and [public website](https://github.com/Clip-Insights/main-site/blob/main/ARCHITECTURE.md).
